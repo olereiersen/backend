@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const pos = {state: 0, start: null}
+const Tub =  require('../models/tub')
+
+/*const pos = {state: 0, start: null}
 const store = [
         {id:1, state: 0, start: null},
         {id:2, state: 0, start: null},
@@ -15,28 +17,119 @@ const store = [
         {id:10, state: 0, start: null},
         {id:11, state: 0, start: null},
         {id:12, state: 0, start: null}
-    ];
+    ];*/
 
-// Handle incomming GET requests to /api/tub/:id
+/*const initTub = (id, state, start) => {
+
+}*/
+
+// Handle READ - /api/tub/:id
 router.get('/:id', (req, res, next) => {
     const id = req.params.id;
-    const unit = store.find((item) => item.id==id);
-    res.status(200).json(unit);
+    Tub.findById(id)
+    .exec()
+    .then(doc => {
+        var result = null;
+        if(!doc) {
+            const tub = Tub({
+                _id: id,
+                state: 0,
+                start: null
+            });
+            result = tub;
+            tub.save()
+            .then(result => {
+                res.status(200).json(result)
+            })
+            .catch(err => {
+                res.status(500).json(err)
+            });
+        } else {
+            result = doc;
+            console.log(result)
+            res.status(200).json(result)
+        }
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({error: err})
+    })
 });
 
-// Handle incomming POST 
+
+// Handle UPDATES - /api/tub/:id
+router.patch('/:id', (req, res, next) => {
+    const id = req.params.id;
+    
+    Tub.updateOne({"_id": id}, { $set: {"state": req.body.state, "start": req.body.start} } )
+    .exec()
+    .then(result => {
+        console.log(result)
+        res.status(200).json({
+            result: result
+          });        
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+          });
+    })
+
+});
+
+
+// Handle INSERT - /api/tub/:id
 router.post('/:id', (req, res, next) => {
     const id = req.params.id;
-    const unit = store.find((item) => item.id==id);
-    unit.state = req.body.state;
-    unit.start = req.body.start;
 
-    res.status(201).json({
-        message: 'Lagret',
-        unit
-      });
+    const tub = Tub({
+        _id: id,
+        state: req.body.state,
+        start: req.body.start
+    });
+    console.log(tub)
+
+    tub.save()
+    .then(result => {
+        console.log(result)
+        res.status(201).json({
+            message: 'Lagret',
+            tub
+          });
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+          });
+    });
+
 
 });
+
+
+// Handle INSERT - /api/tub/:id
+router.delete('/:id', (req, res, next) => {
+    const id = req.params.id;
+
+    Tub.deleteOne({_id: id})
+    .exec()
+    .then(result => {
+        console.log(result)
+        res.status(201).json({
+            message: 'Slettet',
+          });
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+          });
+    });
+
+});
+
 
 
 module.exports = router;

@@ -2,9 +2,12 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-  const tubRoutes = require('./api/routes/tub');
+const tubRoutes = require('./api/routes/tub');
 const compression = require('compression');
+
+mongoose.connect('mongodb://localhost/tub', {useNewUrlParser: true, useUnifiedTopology: true});
 
 // Setup middleware
 app.use(morgan('dev')); // Logging
